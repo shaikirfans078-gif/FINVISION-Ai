@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinVision AI - Advanced Analytics Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --card-light: #ffffff;
+            --border-light: #e2e8f0;
+        }
+        body { background-color: var(--bg-light); color: #1e293b; }
+        .glass-card { background: rgba(255, 255, 255, 0.97); border: 1px solid var(--border-light); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(225,29,72,.35); } 100% { box-shadow: 0 0 0 10px rgba(225,29,72,0); } }
+        .alert-critical { animation: pulseRing 1.6s infinite; }
+        .typing-dot { animation: blink 1.4s infinite both; }
+        .typing-dot:nth-child(2) { animation-delay: .2s; }
+        .typing-dot:nth-child(3) { animation-delay: .4s; }
+        @keyframes blink { 0%,80%,100%{opacity:.2;} 40%{opacity:1;} }
+        input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+    </style>
+</head>
+<body class="font-sans min-h-screen">
+
+    <!-- NAVIGATION HEADER -->
+    <nav class="bg-white/90 backdrop-blur-md text-slate-800 border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-chart-line text-2xl text-indigo-600"></i>
+                <span class="font-bold text-xl tracking-wide">FinVision <span class="text-indigo-600">AI</span></span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden sm:flex items-center space-x-2 text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                    <span>AI Intelligence Scoring Active</span>
+                </div>
+                <div id="authNavControls">
+                    <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Login</button>
+                    <button onclick="openAuthModal('register')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg border border-slate-300 transition">Register</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- AUTHENTICATION MODAL -->
+    <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md p-6 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h2 id="modalTitle" class="text-xl font-bold text-indigo-700 mb-4">Login to FinVision</h2>
+            <div id="authError" class="hidden mb-3 p-2.5 rounded text-xs bg-rose-50 text-rose-600 border border-rose-200"></div>
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4 text-sm">
+                <div id="nameGroup" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Full Name</label>
+                    <input type="text" id="authName" class="w-full p-2 bg-slate-50 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Email Address</label>
+                    <input type="email" id="authEmail" required class="w-full p-2 bg-slate-50 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Password</label>
+                    <input type="password" id="authPassword" required class="w-full p-2 bg-slate-50 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded transition">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN -->
+        <div class="lg:col-span-4 space-y-6">
+
+            <div class="glass-card rounded-xl p-5 shadow-sm">
+                <h2 class="text-lg font-bold text-indigo-700 mb-4 flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-wallet"></i> Financial Entry</span>
+                    <input type="month" id="entryMonth" class="bg-slate-50 border border-slate-300 text-xs text-slate-700 rounded px-2 py-1 outline-none focus:border-indigo-500">
+                </h2>
+                <form id="financialForm" class="space-y-3" onsubmit="event.preventDefault();">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Monthly Income (₹)</label>
+                        <input type="number" id="incomeInput" value="50000" min="0" step="any" oninput="recalculateAll()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <p class="text-[10px] text-slate-400 mt-1">Supports any amount — from ₹1 up to 100 trillion+</p>
+                    </div>
+                    <div class="border-t border-slate-200 pt-3">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Monthly Expenses (₹)</label>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div><span class="text-xs text-slate-500">Food</span>
+                                <input type="number" id="expFood" value="8000" min="0" step="any" oninput="recalculateAll()" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                            <div><span class="text-xs text-slate-500">Rent / Housing</span>
+                                <input type="number" id="expRent" value="12000" min="0" step="any" oninput="recalculateAll()" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                            <div><span class="text-xs text-slate-500">Transport</span>
+                                <input type="number" id="expTransport" value="3000" min="0" step="any" oninput="recalculateAll()" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                            <div><span class="text-xs text-slate-500">Education</span>
+                                <input type="number" id="expEducation" value="2000" min="0" step="any" oninput="recalculateAll()" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                            <div><span class="text-xs text-slate-500">Entertainment</span>
+                                <input type="number" id="expEntertainment" value="3000" min="0" step="any" oninput="recalculateAll()" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                            <div><span class="text-xs text-slate-500">Emergency Fund</span>
+                                <input type="number" id="expEmergency" value="4000" min="0" step="any" oninput="recalculateAll()" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                            <div><span class="text-xs text-slate-500">Others</span>
+                                <input type="number" id="expOthers" value="0" min="0" step="any" oninput="recalculateAll()" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="saveRecordAndNotify()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition shadow-sm mt-2">
+                        Save Monthly Profile
+                    </button>
+                </form>
+            </div>
+
+            <!-- SMART BUDGET PLANNER -->
+            <div class="glass-card rounded-xl p-5 shadow-sm border-2 border-teal-100">
+                <h2 class="text-lg font-bold text-teal-700 mb-2 flex items-center gap-2"><i class="fa-solid fa-calculator"></i> Smart Budget Planner</h2>
+                <p class="text-xs text-slate-500 mb-3">Set what % of income each category should get. We calculate your ₹ plan and alert you the moment actual spending goes over.</p>
+                <div id="budgetPlannerRows" class="space-y-2 text-xs"></div>
+                <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500">Total Allocated</span>
+                    <span id="budgetPercentTotal" class="text-xs font-bold">0%</span>
+                </div>
+                <button onclick="resetBudgetPlan()" class="w-full mt-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium py-1.5 rounded-lg border border-slate-200 transition">Reset to Recommended (50/30/20 style)</button>
+                <div id="budgetPlanAlertBanner" class="hidden mt-3 p-2.5 rounded-lg text-xs font-semibold border"></div>
+                <div class="mt-3 pt-3 border-t border-slate-200">
+                    <p class="text-xs font-semibold text-slate-500 mb-2">Plan vs Actual:</p>
+                    <div id="budgetPlanCompare" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-5 shadow-sm">
+                <h2 class="text-lg font-bold text-indigo-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i> Goal & Asset Planner</h2>
+                <div class="mb-4">
+                    <p class="text-xs text-slate-500 mb-2">Quick Add Target Presets:</p>
+                    <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto custom-scrollbar">
+                        <button onclick="quickAddGoal('Laptop', 60000, 3)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Laptop (60k)</button>
+                        <button onclick="quickAddGoal('Smartphone', 25000, 2)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Phone (25k)</button>
+                        <button onclick="quickAddGoal('Bike', 150000, 12)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Bike (1.5L)</button>
+                        <button onclick="quickAddGoal('Car', 800000, 24)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Car (8L)</button>
+                        <button onclick="quickAddGoal('House', 5000000, 60)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ House (50L)</button>
+                        <button onclick="quickAddGoal('TV', 40000, 2)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ TV (40k)</button>
+                        <button onclick="quickAddGoal('Refrigerator', 35000, 3)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Fridge (35k)</button>
+                        <button onclick="quickAddGoal('Washing Machine', 28000, 2)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Washer (28k)</button>
+                        <button onclick="quickAddGoal('Gaming Console', 50000, 4)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Console (50k)</button>
+                        <button onclick="quickAddGoal('Smartwatch', 15000, 1)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Watch (15k)</button>
+                        <button onclick="quickAddGoal('Gold Chain', 100000, 12)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Gold (1L)</button>
+                        <button onclick="quickAddGoal('Camera', 70000, 6)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Camera (70k)</button>
+                        <button onclick="quickAddGoal('Vacation', 80000, 6)" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-300 px-2 py-1 rounded">+ Vacation (80k)</button>
+                    </div>
+                </div>
+                <div class="space-y-3 text-sm border-t border-slate-200 pt-3">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Target Asset Name</label>
+                        <input type="text" id="goalItem" placeholder="e.g. Electric Scooter" class="w-full p-2 bg-slate-50 border border-slate-300 text-slate-800 rounded">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-xs text-slate-500 mb-1">Cost (₹)</label>
+                            <input type="number" id="goalCost" min="1" step="any" placeholder="90000" class="w-full p-2 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                        <div><label class="block text-xs text-slate-500 mb-1">Target (Months)</label>
+                            <input type="number" id="goalMonths" min="1" placeholder="6" class="w-full p-2 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                    </div>
+                    <button onclick="addCustomGoal()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-1.5 rounded transition">Add Custom Goal</button>
+                </div>
+                <div class="mt-4 border-t border-slate-200 pt-3">
+                    <p class="text-xs font-semibold text-slate-500 mb-2">Active Targets Feasibility:</p>
+                    <div id="goalsList" class="space-y-2 max-h-52 overflow-y-auto custom-scrollbar"></div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-5 shadow-sm">
+                <h2 class="text-lg font-bold text-indigo-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-code-compare"></i> Month Comparison</h2>
+                <div class="space-y-2 text-xs">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="text-slate-500 block mb-1">Month 1 (Base)</label>
+                            <input type="month" id="compM1" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                        <div><label class="text-slate-500 block mb-1">Month 2 (Compare)</label>
+                            <input type="month" id="compM2" class="w-full p-1.5 bg-slate-50 border border-slate-300 text-slate-800 rounded"></div>
+                    </div>
+                    <button onclick="runComparison()" class="w-full bg-slate-100 hover:bg-slate-200 text-indigo-700 font-medium py-1.5 border border-slate-300 rounded transition mt-2">Execute Delta Analysis</button>
+                    <div id="compResult" class="hidden p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card p-4 rounded-xl text-center shadow-sm">
+                    <p class="text-xs text-slate-500 font-semibold uppercase">Total Income</p>
+                    <p id="kpiIncome" class="text-xl font-extrabold text-slate-800">₹0</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center shadow-sm">
+                    <p class="text-xs text-slate-500 font-semibold uppercase">Total Expenses</p>
+                    <p id="kpiExpenses" class="text-xl font-extrabold text-rose-600">₹0</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center shadow-sm">
+                    <p class="text-xs text-slate-500 font-semibold uppercase">Net Savings</p>
+                    <p id="kpiSavings" class="text-xl font-extrabold text-emerald-600">₹0</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center shadow-sm border border-indigo-200">
+                    <p class="text-xs text-slate-500 font-semibold uppercase">AI Health Score</p>
+                    <p id="kpiScore" class="text-xl font-extrabold text-indigo-600">0/100</p>
+                    <span id="scoreBadge" class="text-[10px] px-2 py-0.5 rounded font-bold uppercase mt-1 inline-block bg-slate-100 text-slate-500">Initializing</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-4 rounded-xl shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-600 mb-2 text-center">Expense Breakdown</h3>
+                    <div class="h-48 relative"><canvas id="expenseChart"></canvas></div>
+                </div>
+                <div class="glass-card p-4 rounded-xl shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-600 mb-2 text-center">Budget Allocation vs Ideal (50/30/20)</h3>
+                    <div class="h-48 relative"><canvas id="budgetChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Health Score Breakdown -->
+            <div class="glass-card p-5 rounded-xl shadow-sm">
+                <h3 class="text-md font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-heart-pulse text-indigo-600"></i> Health Score Breakdown</h3>
+                <div id="scoreBreakdown" class="space-y-3 text-xs"></div>
+            </div>
+
+            <!-- Financial Radar -->
+            <div class="glass-card p-5 rounded-xl shadow-sm">
+                <h3 class="text-md font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-satellite-dish text-indigo-600"></i> AI Financial Radar & Overspending Alerts</h3>
+                <div id="riskContainer" class="space-y-2 text-sm"></div>
+            </div>
+
+            <!-- AI Assistant -->
+            <div class="glass-card p-5 rounded-xl shadow-sm border border-indigo-200">
+                <h3 class="text-md font-bold text-indigo-700 mb-2 flex items-center gap-2"><i class="fa-solid fa-robot"></i> FinVision AI Assistant <span class="text-[10px] font-normal text-slate-400">(runs locally — reads your current numbers, no internet needed)</span></h3>
+                <p class="text-xs text-slate-500 mb-3">Click any prompt query below to evaluate live affordability:</p>
+                <div class="flex flex-wrap gap-1.5 mb-3 max-h-32 overflow-y-auto custom-scrollbar p-1 border border-slate-200 rounded bg-slate-50">
+                    <button onclick="askPreset('What is my AI Health Score Breakdown and why?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">📊 Health Score Breakdown</button>
+                    <button onclick="askPreset('Can I afford to buy a new laptop?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">1. Afford new laptop?</button>
+                    <button onclick="askPreset('Can I buy a smartphone within my budget?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">2. Smartphone in budget?</button>
+                    <button onclick="askPreset('How much should I save to buy a bike?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">3. Save for bike?</button>
+                    <button onclick="askPreset('Can I afford to buy a car next year?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">4. Afford car next year?</button>
+                    <button onclick="askPreset('How long will it take me to save for a house?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">5. Save for a house?</button>
+                    <button onclick="askPreset('Can I buy a new TV this month?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">6. Buy TV this month?</button>
+                    <button onclick="askPreset('Is it a good time for me to buy a refrigerator?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">7. Refrigerator now?</button>
+                    <button onclick="askPreset('How much do I need to save to buy a washing machine?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">8. Save for washer?</button>
+                    <button onclick="askPreset('Can I afford to buy a gaming console?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">9. Gaming console?</button>
+                    <button onclick="askPreset('Should I buy a new phone now or save for a few more months?')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">10. Phone now or wait?</button>
+                    <button onclick="askPreset('Where am I overspending and what should I cut?')" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded">🚨 Where am I overspending?</button>
+                    <button onclick="askPreset('How can I improve my Health Score?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">11. Improve my score?</button>
+                    <button onclick="askPreset('Am I financially healthy overall?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">12. Am I financially healthy?</button>
+                    <button onclick="askPreset('Which expense category is costing me the most?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">13. Biggest expense category?</button>
+                    <button onclick="askPreset('How much will I save in a year at this rate?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">14. Yearly savings projection?</button>
+                    <button onclick="askPreset('How much should my emergency fund be?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">15. Ideal emergency fund?</button>
+                    <button onclick="askPreset('What is the 50/30/20 rule?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">16. What's the 50/30/20 rule?</button>
+                    <button onclick="askPreset('Is my rent too high?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">17. Is my rent too high?</button>
+                    <button onclick="askPreset('How much of my income goes to food?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">18. Food % of income?</button>
+                    <button onclick="askPreset('How can I improve my savings?')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded">19. How to improve savings?</button>
+                    <button onclick="askPreset('Am I within my budget plan?')" class="text-xs bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 px-2 py-1 rounded">20. Am I within my plan?</button>
+                    <button onclick="askPreset('Hi')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 px-2 py-1 rounded">👋 Say hi</button>
+                </div>
+                <div id="chatHistory" class="h-56 overflow-y-auto bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-2 mb-3 custom-scrollbar">
+                    <div class="bg-white text-slate-700 p-2.5 rounded-lg max-w-[88%] border border-slate-200 shadow-sm">
+                        Greetings! I am your AI Financial Intelligence Assistant, connected live to your current entries. Ask me anything, or click "Health Score Breakdown" above.
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="userQuery" placeholder="Ask your financial question..." class="flex-1 p-2 bg-slate-50 border border-slate-300 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeypress="if(event.key==='Enter') askAIAssistant()">
+                    <button id="sendBtn" onclick="askAIAssistant()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREVIOUS DATA (last page of the dashboard: history of every month you've saved, up to 12 months) -->
+    <div class="max-w-7xl mx-auto px-4 pb-10">
+        <div class="glass-card rounded-xl p-5 shadow-sm border-2 border-indigo-100">
+            <h2 class="text-lg font-bold text-indigo-700 mb-1 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> Previous Data</h2>
+            <p class="text-xs text-slate-500 mb-4">Every month you save (using the "Save This Month" button above) is kept here — up to your last 12 months. Click a month to load it back into the form above, or remove it from your history.</p>
+
+            <div class="overflow-x-auto max-h-96 custom-scrollbar border border-slate-200 rounded-lg">
+                <table class="w-full text-xs">
+                    <thead class="bg-slate-100 sticky top-0">
+                        <tr class="text-left text-slate-500">
+                            <th class="p-2">Month</th><th class="p-2">Income</th><th class="p-2">Total Expenses</th>
+                            <th class="p-2">Net Savings</th><th class="p-2">Health Score</th><th class="p-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="previousDataTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENT-SIDE AUTHENTICATION LOGIC -->
+    <script>
+        // Backend is now deployed separately from this frontend. Point this at
+        // wherever you run the backend (e.g. http://localhost:3000, or your
+        // deployed API URL). Leave as '' if you reverse-proxy /api to the
+        // backend from the same origin the frontend is served from.
+        const API_BASE_URL = 'http://localhost:3000';
+
+        let currentAuthMode = 'login';
+        let accessToken = null;
+        let currentUserId = null; // id of the logged-in user, used to load/save their saved profile
+
+        function openAuthModal(mode) {
+            currentAuthMode = mode;
+            document.getElementById('authError').classList.add('hidden');
+            document.getElementById('modalTitle').innerText = mode === 'login' ? 'Login to FinVision' : 'Create an Account';
+            document.getElementById('nameGroup').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('authSubmitBtn').innerText = mode === 'login' ? 'Login' : 'Register';
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        // Whether a real backend was detected. Starts unknown (null) and is
+        // set to true/false the first time we get a response from /api/*.
+        let backendAvailable = null;
+
+        // Safely parse a fetch Response as JSON. If the server returned HTML
+        // (e.g. a static host's fallback page) instead of JSON, this throws
+        // a NON_JSON_RESPONSE error so the caller can fall back to Demo Mode
+        // instead of crashing on JSON.parse.
+        async function parseJsonResponse(res) {
+            const contentType = res.headers.get('content-type') || '';
+            const rawText = await res.text();
+
+            if (!contentType.includes('application/json')) {
+                const err = new Error('NON_JSON_RESPONSE');
+                err.preview = rawText.slice(0, 60).replace(/\s+/g, ' ');
+                throw err;
+            }
+
+            return JSON.parse(rawText);
+        }
+
+        // ---- Demo Mode fallback (used only when no real backend is found) ----
+        // Stores users/sessions in localStorage so the UI is still usable when
+        // this page is deployed on a static-only host with no Node server
+        // behind /api/*. Clearly not secure - for demo/testing purposes only.
+        function demoGetUsers() {
+            return JSON.parse(localStorage.getItem('demoUsersDB') || '[]');
+        }
+        function demoSaveUsers(users) {
+            localStorage.setItem('demoUsersDB', JSON.stringify(users));
+        }
+        function demoAuth(mode, { name, email, password }) {
+            const users = demoGetUsers();
+            if (mode === 'register') {
+                if (users.find(u => u.email === email)) {
+                    throw new Error('User already exists');
+                }
+                const user = { id: String(users.length + 1), name, email, password };
+                users.push(user);
+                demoSaveUsers(users);
+                return { accessToken: 'demo-token', refreshToken: 'demo-refresh-' + user.id, user: { id: user.id, name: user.name, email: user.email } };
+            } else {
+                const user = users.find(u => u.email === email && u.password === password);
+                if (!user) throw new Error('Invalid credentials');
+                return { accessToken: 'demo-token', refreshToken: 'demo-refresh-' + user.id, user: { id: user.id, name: user.name, email: user.email } };
+            }
+        }
+
+        function showDemoModeBanner() {
+            if (document.getElementById('demoModeBanner')) return;
+            const banner = document.createElement('div');
+            banner.id = 'demoModeBanner';
+            banner.className = 'bg-amber-50 text-amber-800 text-xs text-center py-1.5 border-b border-amber-200';
+            banner.innerText = 'Demo Mode: no live backend detected at /api - using local browser storage instead of a real server.';
+            document.body.prepend(banner);
+        }
+
+        // ---- Saved profile (Financial Entry months, Budget Planner %, Goals) ----
+        // Persisted per-account: on a real backend this is stored server-side
+        // (see /api/profile in server.js), tied to the user's id, so logging
+        // out and back into the SAME account brings all of it back. In Demo
+        // Mode (no backend reachable) the same data is kept in localStorage,
+        // scoped to that demo account's id, so the behavior matches either way.
+        function demoProfileKey(userId) {
+            return 'demoProfile_' + userId;
+        }
+
+        // Pulls whatever was saved for the current user into the live
+        // dashboard state, then re-renders everything that depends on it.
+        function applyLoadedProfile(profile) {
+            if (!profile) return;
+            if (profile.records && typeof profile.records === 'object') {
+                Object.keys(monthlyRecords).forEach(k => delete monthlyRecords[k]);
+                Object.assign(monthlyRecords, profile.records);
+                trimHistoryToMaxMonths();
+            }
+            if (profile.budgetPlan && typeof profile.budgetPlan === 'object') {
+                budgetPlan = { ...DEFAULT_BUDGET_PLAN, ...profile.budgetPlan };
+            }
+            if (Array.isArray(profile.goals)) {
+                goals = profile.goals;
+            }
+
+            renderBudgetPlannerRows();
+            renderPreviousDataTab();
+            // If the currently-selected month has saved data, load it into the
+            // form too; either way, refresh every chart/score/goal panel.
+            if (monthlyRecords[currentMonthKey()]) {
+                changeActiveMonth();
+            } else {
+                recalculateAll();
+            }
+        }
+
+        // Fetches the logged-in user's saved profile (records/budgetPlan/goals)
+        // right after login or on page reload while already logged in.
+        async function loadProfileFromServer() {
+            if (!currentUserId) return;
+
+            if (backendAvailable === false) {
+                const saved = localStorage.getItem(demoProfileKey(currentUserId));
+                if (saved) applyLoadedProfile(JSON.parse(saved));
+                return;
+            }
+
+            try {
+                const res = await fetch(API_BASE_URL + '/api/profile', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                const data = await parseJsonResponse(res);
+                backendAvailable = true;
+                if (res.ok) applyLoadedProfile(data);
+            } catch (err) {
+                if (err.message === 'NON_JSON_RESPONSE' || err instanceof TypeError) {
+                    backendAvailable = false;
+                    showDemoModeBanner();
+                    const saved = localStorage.getItem(demoProfileKey(currentUserId));
+                    if (saved) applyLoadedProfile(JSON.parse(saved));
+                } else {
+                    console.error('Could not load saved profile:', err.message);
+                }
+            }
+        }
+
+        // Saves the current dashboard state (records/budgetPlan/goals) for the
+        // logged-in user. Called after every change that should survive a
+        // logout - saving a month, adding/removing a goal, editing the budget
+        // plan. Silently does nothing while logged out, same as before.
+        async function persistProfile() {
+            if (!currentUserId) return;
+            const payload = { records: monthlyRecords, budgetPlan, goals };
+
+            if (backendAvailable === false) {
+                localStorage.setItem(demoProfileKey(currentUserId), JSON.stringify(payload));
+                return;
+            }
+
+            try {
+                const res = await fetch(API_BASE_URL + '/api/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+                    body: JSON.stringify(payload)
+                });
+                await parseJsonResponse(res);
+                backendAvailable = true;
+            } catch (err) {
+                if (err.message === 'NON_JSON_RESPONSE' || err instanceof TypeError) {
+                    backendAvailable = false;
+                    showDemoModeBanner();
+                    localStorage.setItem(demoProfileKey(currentUserId), JSON.stringify(payload));
+                } else {
+                    console.error('Could not save profile:', err.message);
+                }
+            }
+        }
+
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value;
+            const endpoint = API_BASE_URL + (currentAuthMode === 'login' ? '/api/auth/login' : '/api/auth/register');
+
+            try {
+                let data;
+                if (backendAvailable === false) {
+                    data = demoAuth(currentAuthMode, { name, email, password });
+                } else {
+                    try {
+                        const res = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password, name })
+                        });
+                        data = await parseJsonResponse(res);
+                        backendAvailable = true;
+                        if (!res.ok) throw new Error(data.error || 'Authentication failed');
+                    } catch (err) {
+                        if (err.message === 'NON_JSON_RESPONSE' || err instanceof TypeError) {
+                            // No real backend reachable - fall back to Demo Mode.
+                            backendAvailable = false;
+                            showDemoModeBanner();
+                            data = demoAuth(currentAuthMode, { name, email, password });
+                        } else {
+                            throw err;
+                        }
+                    }
+                }
+
+                accessToken = data.accessToken;
+                currentUserId = data.user.id;
+                localStorage.setItem('refreshToken', data.refreshToken);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                updateUIForLoggedInUser(data.user);
+                closeAuthModal();
+                // Load whatever this account had saved previously (if this is
+                // a returning login) so the dashboard shows their real data
+                // instead of resetting to the blank defaults.
+                await loadProfileFromServer();
+            } catch (err) {
+                const errDiv = document.getElementById('authError');
+                errDiv.innerText = err.message;
+                errDiv.classList.remove('hidden');
+            }
+        }
+
+        function updateUIForLoggedInUser(user) {
+            const nav = document.getElementById('authNavControls');
+            nav.innerHTML = `
+                <div class="flex items-center space-x-3 text-xs">
+                    <span class="font-bold text-slate-700">Welcome, ${user.name}</span>
+                    <button onclick="logout()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded transition">Logout</button>
+                </div>
+            `;
+        }
+
+        async function logout() {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (backendAvailable !== false) {
+                try {
+                    await fetch(API_BASE_URL + '/api/auth/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ refreshToken })
+                    });
+                } catch (e) {
+                    // Ignore - we're logging out locally regardless.
+                }
+            }
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            accessToken = null;
+            currentUserId = null;
+            location.reload();
+        }
+
+        // Automatic Token Refresh (skipped entirely in Demo Mode, since demo
+        // sessions don't expire).
+        async function refreshAccessToken() {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken || (refreshToken && refreshToken.startsWith('demo-refresh-'))) {
+                backendAvailable = refreshToken ? false : backendAvailable;
+                if (refreshToken) showDemoModeBanner();
+                return;
+            }
+            try {
+                const res = await fetch(API_BASE_URL + '/api/auth/refresh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+                const data = await parseJsonResponse(res);
+                backendAvailable = true;
+                if (res.ok) {
+                    accessToken = data.accessToken;
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                } else {
+                    logout();
+                }
+            } catch (e) {
+                // Server unreachable or returned a non-JSON (HTML) response -
+                // don't silently log the user out on a transient network blip,
+                // just stop refreshing until the next page load.
+                console.error('Token refresh failed:', e.message);
+            }
+        }
+
+        window.onload = async () => {
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                currentUserId = user.id;
+                updateUIForLoggedInUser(user);
+                await refreshAccessToken();
+                // Now that we (hopefully) have a fresh access token, pull this
+                // account's saved months/budget plan/goals back in.
+                await loadProfileFromServer();
+            }
+        };
+    </script>
+
+    <!-- FULL FINANCIAL DASHBOARD ENGINE -->
+    <script>
+/* ============================= STATE ============================= */
+const monthlyRecords = {};   // { "2026-08": { income, food, rent, transport, education, entertainment, emergency } }
+let goals = [];               // { id, item, cost, months, monthlySaveNeeded, feasible }
+let expenseChart, budgetChart;
+let latestSnapshot = null;    // last computed financial snapshot, fed to the AI assistant
+
+// Smart Budget Planner state — percentage of income allocated to each category.
+// Defaults follow a 50/30/20-style split spread across the real categories.
+const DEFAULT_BUDGET_PLAN = { rent: 25, food: 15, transport: 10, education: 10, entertainment: 10, emergency: 15, others: 15 };
+let budgetPlan = { ...DEFAULT_BUDGET_PLAN };
+
+const BUDGET_CATEGORY_META = [
+    { key: 'rent', label: 'Rent / Housing', inputId: 'expRent', icon: 'fa-house' },
+    { key: 'food', label: 'Food', inputId: 'expFood', icon: 'fa-utensils' },
+    { key: 'transport', label: 'Transport', inputId: 'expTransport', icon: 'fa-car' },
+    { key: 'education', label: 'Education', inputId: 'expEducation', icon: 'fa-book' },
+    { key: 'entertainment', label: 'Entertainment', inputId: 'expEntertainment', icon: 'fa-film' },
+    { key: 'emergency', label: 'Emergency Fund', inputId: 'expEmergency', icon: 'fa-piggy-bank' },
+    { key: 'others', label: 'Others', inputId: 'expOthers', icon: 'fa-ellipsis' },
+];
+
+/* ============================= HELPERS ============================= */
+// Formats any amount from ₹1 up to 100+ trillion using Indian digit grouping,
+// with Lakh/Crore-style compact suffixes once numbers get very large.
+function inr(n) {
+    n = Math.round(n);
+    const abs = Math.abs(n);
+    const sign = n < 0 ? '-' : '';
+    if (abs >= 1e13) return sign + '₹' + (abs / 1e12).toFixed(2) + ' Lakh Cr';   // 100 trillion+ territory
+    if (abs >= 1e11) return sign + '₹' + (abs / 1e11).toFixed(2) + ' K Cr';
+    if (abs >= 1e7)  return sign + '₹' + (abs / 1e7).toFixed(2) + ' Cr';
+    if (abs >= 1e5)  return sign + '₹' + (abs / 1e5).toFixed(2) + ' L';
+    return '₹' + n.toLocaleString('en-IN');
+}
+function inrFull(n) {
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+function currentMonthKey() {
+    const el = document.getElementById('entryMonth');
+    if (el.value) return el.value;
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function readInputs() {
+    return {
+        income: Number(document.getElementById('incomeInput').value) || 0,
+        food: Number(document.getElementById('expFood').value) || 0,
+        rent: Number(document.getElementById('expRent').value) || 0,
+        transport: Number(document.getElementById('expTransport').value) || 0,
+        education: Number(document.getElementById('expEducation').value) || 0,
+        entertainment: Number(document.getElementById('expEntertainment').value) || 0,
+        emergency: Number(document.getElementById('expEmergency').value) || 0,
+        others: Number(document.getElementById('expOthers').value) || 0,
+    };
+}
+
+/* ============================= CORE ENGINE ============================= */
+function computeSnapshot(data) {
+    const { income, food, rent, transport, education, entertainment, emergency, others } = data;
+    const needs = food + rent + transport + education;       // essentials
+    const wants = entertainment + others;                     // discretionary (entertainment + miscellaneous "Others")
+    const totalExpenses = needs + wants + emergency;
+    const netSavings = income - totalExpenses;
+
+    const idealNeeds = income * 0.5;
+    const idealWants = income * 0.3;
+    const idealSavings = income * 0.2;
+
+    // savings actually "banked" = emergency fund contribution + whatever is left over
+    const savingsBanked = emergency + Math.max(netSavings, 0);
+    const savingsRatio = income > 0 ? savingsBanked / income : 0;
+    const needsRatio = income > 0 ? needs / income : 0;
+    const wantsRatio = income > 0 ? wants / income : 0;
+    const emergencyRatio = income > 0 ? emergency / income : 0;
+
+    // --- Health score components (sum to 100) ---
+    const scoreSavings   = clamp01(savingsRatio / 0.20) * 30;                       // target 20% saved
+    const scoreNeeds     = (1 - clamp01(Math.max(0, needsRatio - 0.5) / 0.5)) * 25;  // penalize needs > 50%
+    const scoreWants     = (1 - clamp01(Math.max(0, wantsRatio - 0.3) / 0.3)) * 20;  // penalize wants > 30%
+    const scoreEmergency = clamp01(emergencyRatio / 0.10) * 25;                      // target 10% to emergency fund
+    let healthScore = Math.round(scoreSavings + scoreNeeds + scoreWants + scoreEmergency);
+    healthScore = Math.max(1, Math.min(100, healthScore || 1));
+
+    return {
+        income, food, rent, transport, education, entertainment, emergency, others,
+        needs, wants, totalExpenses, netSavings,
+        idealNeeds, idealWants, idealSavings,
+        savingsRatio, needsRatio, wantsRatio, emergencyRatio,
+        scoreSavings, scoreNeeds, scoreWants, scoreEmergency,
+        healthScore
+    };
+}
+function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
+function scoreBadgeInfo(score) {
+    if (score >= 80) return { label: 'Excellent', color: 'bg-emerald-100 text-emerald-700' };
+    if (score >= 60) return { label: 'Good', color: 'bg-indigo-100 text-indigo-700' };
+    if (score >= 40) return { label: 'At Risk', color: 'bg-amber-100 text-amber-700' };
+    return { label: 'Critical', color: 'bg-rose-100 text-rose-700' };
+}
+
+/* ============================= RENDER: KPIs + SCORE ============================= */
+function renderKPIs(s) {
+    document.getElementById('kpiIncome').textContent = inrFull(s.income);
+    document.getElementById('kpiExpenses').textContent = inrFull(s.totalExpenses);
+    const savEl = document.getElementById('kpiSavings');
+    savEl.textContent = inrFull(s.netSavings);
+    savEl.className = 'text-xl font-extrabold ' + (s.netSavings >= 0 ? 'text-emerald-600' : 'text-rose-600');
+
+    document.getElementById('kpiScore').textContent = `${s.healthScore}/100`;
+    const badge = scoreBadgeInfo(s.healthScore);
+    const badgeEl = document.getElementById('scoreBadge');
+    badgeEl.textContent = badge.label;
+    badgeEl.className = `text-[10px] px-2 py-0.5 rounded font-bold uppercase mt-1 inline-block ${badge.color}`;
+}
+
+function renderScoreBreakdown(s) {
+    const rows = [
+        { label: `Savings Rate (${(s.savingsRatio*100).toFixed(1)}% saved, target 20%)`, val: s.scoreSavings, max: 30 },
+        { label: `Essential Spending (${(s.needsRatio*100).toFixed(1)}% of income, target ≤50%)`, val: s.scoreNeeds, max: 25 },
+        { label: `Discretionary Spending — Entertainment + Others (${(s.wantsRatio*100).toFixed(1)}% of income, target ≤30%)`, val: s.scoreWants, max: 20 },
+        { label: `Emergency Fund (${(s.emergencyRatio*100).toFixed(1)}% of income, target ≥10%)`, val: s.scoreEmergency, max: 25 },
+    ];
+    document.getElementById('scoreBreakdown').innerHTML = rows.map(r => {
+        const pct = Math.round((r.val / r.max) * 100);
+        const barColor = pct >= 75 ? 'bg-emerald-500' : pct >= 45 ? 'bg-amber-500' : 'bg-rose-500';
+        return `
+        <div>
+            <div class="flex justify-between text-slate-500 mb-1">
+                <span>${r.label}</span>
+                <span class="text-slate-700 font-semibold">${r.val.toFixed(1)} / ${r.max} pts</span>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="${barColor} h-2" style="width:${pct}%"></div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ============================= RENDER: RADAR / ALERTS ============================= */
+function renderRadar(s) {
+    const alerts = [];
+
+    if (s.netSavings < 0) {
+        alerts.push({
+            level: 'critical',
+            icon: 'fa-triangle-exclamation',
+            title: 'You are spending more than you earn',
+            msg: `Expenses exceed income by ${inrFull(Math.abs(s.netSavings))} this month. Cut discretionary spend immediately and pause any new purchase goals until this is positive.`
+        });
+    }
+    if (s.needs > s.idealNeeds) {
+        alerts.push({
+            level: 'warning',
+            icon: 'fa-house-chimney-crack',
+            title: 'Essentials over the recommended 50% limit',
+            msg: `Food + Rent + Transport + Education = ${inrFull(s.needs)}, which is ${inrFull(s.needs - s.idealNeeds)} over the recommended cap of ${inrFull(s.idealNeeds)}. Consider renegotiating rent, batch-cooking to cut food costs, or carpooling for transport.`
+        });
+    }
+    if (s.wants > s.idealWants) {
+        alerts.push({
+            level: 'warning',
+            icon: 'fa-gamepad',
+            title: 'Discretionary spend over the recommended 30% limit',
+            msg: `Entertainment + Others = ${inrFull(s.wants)} (Entertainment ${inrFull(s.entertainment)} + Others ${inrFull(s.others)}), which is ${inrFull(s.wants - s.idealWants)} above the ${inrFull(s.idealWants)} guideline. Try a 1-month "fun budget cap" of ${inrFull(s.idealWants)} and redirect the rest to savings.`
+        });
+    }
+    if (s.emergency < s.idealSavings) {
+        alerts.push({
+            level: 'info',
+            icon: 'fa-piggy-bank',
+            title: 'Emergency fund under target',
+            msg: `You're setting aside ${inrFull(s.emergency)} (${(s.emergencyRatio*100).toFixed(1)}%) vs the recommended 20% (${inrFull(s.idealSavings)}). Automate a transfer of at least ${inrFull(s.idealSavings - s.emergency)} more each month.`
+        });
+    }
+    if (s.healthScore < 40) {
+        alerts.push({
+            level: 'critical',
+            icon: 'fa-heart-crack',
+            title: 'Financial health score is critical',
+            msg: `Score is ${s.healthScore}/100. Priority order: stop deficit spending → cap discretionary spend → build a 3-month emergency buffer before any new goal purchases.`
+        });
+    }
+    if (alerts.length === 0) {
+        alerts.push({
+            level: 'good',
+            icon: 'fa-circle-check',
+            title: 'All budget categories within recommended limits',
+            msg: `Great work — needs, wants and savings are all inside the ideal 50/30/20 ranges. Keep this pace and your health score will continue climbing.`
+        });
+    }
+
+    const styles = {
+        critical: { bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700', pulse: 'alert-critical' },
+        warning:  { bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-700', pulse: '' },
+        info:     { bg: 'bg-indigo-50', border: 'border-indigo-300', text: 'text-indigo-700', pulse: '' },
+        good:     { bg: 'bg-emerald-50', border: 'border-emerald-300', text: 'text-emerald-700', pulse: '' },
+    };
+
+    document.getElementById('riskContainer').innerHTML = alerts.map(a => {
+        const st = styles[a.level];
+        return `
+        <div class="${st.bg} ${st.border} ${st.pulse} border rounded-lg p-3 flex gap-3">
+            <i class="fa-solid ${a.icon} ${st.text} mt-0.5"></i>
+            <div>
+                <p class="${st.text} font-semibold text-sm">${a.title}</p>
+                <p class="text-slate-500 text-xs mt-0.5">${a.msg}</p>
+            </div>
+        </div>`;
+    }).join('');
+
+    return alerts;
+}
+
+/* ============================= RENDER: CHARTS ============================= */
+function renderCharts(s) {
+    const ctx1 = document.getElementById('expenseChart');
+    const ctx2 = document.getElementById('budgetChart');
+
+    const expenseData = {
+        labels: ['Food','Rent','Transport','Education','Entertainment','Emergency','Others'],
+        datasets: [{
+            data: [s.food, s.rent, s.transport, s.education, s.entertainment, s.emergency, s.others],
+            backgroundColor: ['#6366f1','#0ea5e9','#14b8a6','#a855f7','#ec4899','#10b981','#f59e0b'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+        }]
+    };
+    const budgetData = {
+        labels: ['Needs','Wants','Savings'],
+        datasets: [
+            { label: 'Actual', data: [s.needs, s.wants, s.emergency + Math.max(s.netSavings,0)], backgroundColor: '#4f46e5' },
+            { label: 'Ideal (50/30/20)', data: [s.idealNeeds, s.idealWants, s.idealSavings], backgroundColor: '#cbd5e1' }
+        ]
+    };
+
+    if (expenseChart) { expenseChart.data = expenseData; expenseChart.update(); }
+    else {
+        expenseChart = new Chart(ctx1, {
+            type: 'doughnut',
+            data: expenseData,
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#475569', boxWidth: 10, font: { size: 9 } } } } }
+        });
+    }
+    if (budgetChart) { budgetChart.data = budgetData; budgetChart.update(); }
+    else {
+        budgetChart = new Chart(ctx2, {
+            type: 'bar',
+            data: budgetData,
+            options: {
+                plugins: { legend: { position: 'bottom', labels: { color: '#475569', boxWidth: 10, font: { size: 9 } } } },
+                scales: {
+                    x: { ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } },
+                    y: { ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } }
+                }
+            }
+        });
+    }
+}
+
+/* ============================= SMART BUDGET PLANNER ============================= */
+function renderBudgetPlannerRows() {
+    const el = document.getElementById('budgetPlannerRows');
+    el.innerHTML = BUDGET_CATEGORY_META.map(c => `
+        <div class="flex items-center gap-2">
+            <i class="fa-solid ${c.icon} text-teal-600 w-4 text-center"></i>
+            <span class="flex-1 text-slate-600">${c.label}</span>
+            <input type="number" min="0" max="100" step="1" value="${budgetPlan[c.key]}"
+                   onchange="updateBudgetPercent('${c.key}', this.value)"
+                   class="w-16 p-1 bg-slate-50 border border-slate-300 rounded text-right text-slate-800">
+            <span class="text-slate-400">%</span>
+        </div>
+    `).join('');
+    updateBudgetPercentTotal();
+}
+function updateBudgetPercentTotal() {
+    const total = BUDGET_CATEGORY_META.reduce((sum, c) => sum + (Number(budgetPlan[c.key]) || 0), 0);
+    const totalEl = document.getElementById('budgetPercentTotal');
+    totalEl.textContent = `${total}%`;
+    totalEl.className = 'text-xs font-bold ' + (total === 100 ? 'text-emerald-600' : 'text-amber-600');
+}
+function updateBudgetPercent(key, value) {
+    budgetPlan[key] = Math.max(0, Math.min(100, Number(value) || 0));
+    updateBudgetPercentTotal();
+    recalculateAll();
+    persistProfile();
+}
+function resetBudgetPlan() {
+    budgetPlan = { ...DEFAULT_BUDGET_PLAN };
+    renderBudgetPlannerRows();
+    recalculateAll();
+    persistProfile();
+}
+
+function renderBudgetPlanCompare(s) {
+    const compareEl = document.getElementById('budgetPlanCompare');
+    const bannerEl = document.getElementById('budgetPlanAlertBanner');
+    let overCount = 0;
+    let totalPlanned = 0;
+    let totalActual = 0;
+
+    const rowsHtml = BUDGET_CATEGORY_META.map(c => {
+        const planned = s.income * (budgetPlan[c.key] / 100);
+        const actual = s[c.key];
+        totalPlanned += planned;
+        totalActual += actual;
+        const pctUsed = planned > 0 ? (actual / planned) * 100 : (actual > 0 ? 999 : 0);
+        const over = actual > planned && planned >= 0;
+        if (over) overCount++;
+        const barColor = over ? 'bg-rose-500' : pctUsed > 85 ? 'bg-amber-500' : 'bg-emerald-500';
+        const barWidth = Math.min(100, pctUsed);
+        return `
+        <div>
+            <div class="flex justify-between text-slate-500 mb-1">
+                <span>${c.label}</span>
+                <span class="${over ? 'text-rose-600 font-semibold' : 'text-slate-600'}">${inrFull(actual)} / ${inrFull(planned)} planned</span>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="${barColor} h-2" style="width:${barWidth}%"></div>
+            </div>
+            ${over ? `<p class="text-rose-600 text-[11px] mt-0.5"><i class="fa-solid fa-circle-exclamation"></i> Over budget by ${inrFull(actual - planned)}</p>` : ''}
+        </div>`;
+    }).join('');
+
+    compareEl.innerHTML = rowsHtml;
+
+    if (overCount > 0) {
+        bannerEl.className = 'mt-3 p-2.5 rounded-lg text-xs font-semibold border bg-rose-50 border-rose-300 text-rose-700';
+        bannerEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${overCount} categor${overCount === 1 ? 'y is' : 'ies are'} over your budget plan. Total actual spend ${inrFull(totalActual)} vs planned ${inrFull(totalPlanned)}.`;
+        bannerEl.classList.remove('hidden');
+    } else if (s.income > 0) {
+        bannerEl.className = 'mt-3 p-2.5 rounded-lg text-xs font-semibold border bg-emerald-50 border-emerald-300 text-emerald-700';
+        bannerEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> You're within plan across every category. Total spend ${inrFull(totalActual)} of ${inrFull(totalPlanned)} planned.`;
+        bannerEl.classList.remove('hidden');
+    } else {
+        bannerEl.classList.add('hidden');
+    }
+}
+
+/* ============================= GOALS ============================= */
+function quickAddGoal(item, cost, months) {
+    document.getElementById('goalItem').value = item;
+    document.getElementById('goalCost').value = cost;
+    document.getElementById('goalMonths').value = months;
+    addCustomGoal();
+}
+function addCustomGoal() {
+    const item = document.getElementById('goalItem').value.trim();
+    const cost = Number(document.getElementById('goalCost').value);
+    const months = Number(document.getElementById('goalMonths').value);
+    if (!item || !cost || !months) return;
+
+    const s = computeSnapshot(readInputs());
+    const monthlyNeeded = cost / months;
+    const availableForGoals = Math.max(s.netSavings, 0);
+    const feasible = monthlyNeeded <= availableForGoals;
+
+    goals.push({ id: Date.now(), item, cost, months, monthlyNeeded, feasible, availableForGoals });
+    document.getElementById('goalItem').value = '';
+    document.getElementById('goalCost').value = '';
+    document.getElementById('goalMonths').value = '';
+    renderGoals();
+    persistProfile();
+}
+function removeGoal(id) {
+    goals = goals.filter(g => g.id !== id);
+    renderGoals();
+    persistProfile();
+}
+function renderGoals() {
+    const el = document.getElementById('goalsList');
+    if (goals.length === 0) {
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">No active goals yet — add one above or use a quick preset.</p>`;
+        return;
+    }
+    el.innerHTML = goals.map(g => `
+        <div class="bg-slate-50 border ${g.feasible ? 'border-emerald-300' : 'border-rose-300'} rounded-lg p-2.5 text-xs flex justify-between items-start gap-2">
+            <div>
+                <p class="font-semibold text-slate-700">${g.item} — ${inrFull(g.cost)}</p>
+                <p class="text-slate-500">Need ${inrFull(g.monthlyNeeded)}/mo for ${g.months} mo · you have ${inrFull(g.availableForGoals)}/mo free</p>
+                <p class="${g.feasible ? 'text-emerald-600' : 'text-rose-600'} font-semibold mt-0.5">${g.feasible ? '✓ On track' : '✗ Not feasible at current pace'}</p>
+            </div>
+            <button onclick="removeGoal(${g.id})" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    `).join('');
+}
+
+/* ============================= MONTH SAVE / COMPARE ============================= */
+// Keeps only the most recent MAX_HISTORY_MONTHS in monthlyRecords, oldest
+// first evicted, so history never grows unbounded. Called every time a
+// month is saved.
+const MAX_HISTORY_MONTHS = 12;
+function trimHistoryToMaxMonths() {
+    const keys = Object.keys(monthlyRecords).sort(); // "YYYY-MM" sorts chronologically as a string
+    while (keys.length > MAX_HISTORY_MONTHS) {
+        const oldest = keys.shift();
+        delete monthlyRecords[oldest];
+    }
+}
+function saveRecordAndNotify() {
+    const key = currentMonthKey();
+    monthlyRecords[key] = readInputs();
+    trimHistoryToMaxMonths();
+    renderPreviousDataTab();
+    const btn = document.querySelector('#financialForm button');
+    const original = btn.textContent;
+    if (currentUserId) {
+        btn.textContent = `✓ Saved ${key} to your account`;
+        persistProfile();
+    } else {
+        btn.textContent = `✓ Saved ${key} (log in to keep this after logout)`;
+    }
+    setTimeout(() => btn.textContent = original, 1800);
+}
+
+/* ============================= PREVIOUS DATA (last 12 months) ============================= */
+// Renders every saved month (most recent first) with its income, total
+// expenses, net savings and Health Score, computed via the same
+// computeSnapshot() engine used for the live dashboard above.
+function renderPreviousDataTab() {
+    const tbody = document.getElementById('previousDataTableBody');
+    if (!tbody) return;
+    const keys = Object.keys(monthlyRecords).sort().reverse();
+
+    if (keys.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-slate-400 italic">No months saved yet — use "Save This Month" above to start building your history.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = keys.map(key => {
+        const s = computeSnapshot(monthlyRecords[key]);
+        return `
+            <tr class="border-t border-slate-100">
+                <td class="p-2 font-semibold text-slate-700">${key}</td>
+                <td class="p-2">${inrFull(s.income)}</td>
+                <td class="p-2">${inrFull(s.totalExpenses)}</td>
+                <td class="p-2 ${s.netSavings >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-semibold">${inrFull(s.netSavings)}</td>
+                <td class="p-2">${s.healthScore}/100</td>
+                <td class="p-2 flex gap-2">
+                    <button onclick="loadPreviousMonth('${key}')" class="text-indigo-600 hover:text-indigo-800 font-medium">Load</button>
+                    <button onclick="deletePreviousMonth('${key}')" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Loads a previously saved month back into the entry form above (reuses
+// the existing month-change logic) and scrolls it into view.
+function loadPreviousMonth(key) {
+    document.getElementById('entryMonth').value = key;
+    changeActiveMonth();
+    document.getElementById('financialForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function deletePreviousMonth(key) {
+    delete monthlyRecords[key];
+    renderPreviousDataTab();
+    if (currentUserId) persistProfile();
+}
+
+function runComparison() {
+    const k1 = document.getElementById('compM1').value;
+    const k2 = document.getElementById('compM2').value;
+    const box = document.getElementById('compResult');
+    box.classList.remove('hidden');
+    if (!k1 || !k2 || !monthlyRecords[k1] || !monthlyRecords[k2]) {
+        box.innerHTML = `<p class="text-rose-600">Both months must be saved first via "Save Monthly Profile" before comparing.</p>`;
+        return;
+    }
+    const a = computeSnapshot(monthlyRecords[k1]);
+    const b = computeSnapshot(monthlyRecords[k2]);
+    const diffExp = b.totalExpenses - a.totalExpenses;
+    const diffSav = b.netSavings - a.netSavings;
+    const diffScore = b.healthScore - a.healthScore;
+    box.innerHTML = `
+        <p><span class="text-slate-400">Expenses:</span> ${inrFull(a.totalExpenses)} → ${inrFull(b.totalExpenses)}
+            <span class="${diffExp>0?'text-rose-600':'text-emerald-600'}">(${diffExp>0?'+':''}${inrFull(diffExp)})</span></p>
+        <p><span class="text-slate-400">Net Savings:</span> ${inrFull(a.netSavings)} → ${inrFull(b.netSavings)}
+            <span class="${diffSav<0?'text-rose-600':'text-emerald-600'}">(${diffSav>0?'+':''}${inrFull(diffSav)})</span></p>
+        <p><span class="text-slate-400">Health Score:</span> ${a.healthScore} → ${b.healthScore}
+            <span class="${diffScore<0?'text-rose-600':'text-emerald-600'}">(${diffScore>0?'+':''}${diffScore})</span></p>
+    `;
+}
+
+/* ============================= MASTER RECALC ============================= */
+function recalculateAll() {
+    const data = readInputs();
+    const s = computeSnapshot(data);
+    latestSnapshot = s;
+    renderKPIs(s);
+    renderScoreBreakdown(s);
+    renderRadar(s);
+    renderCharts(s);
+    renderGoals();
+    renderBudgetPlanCompare(s);
+}
+function changeActiveMonth() {
+    const key = currentMonthKey();
+    if (monthlyRecords[key]) {
+        const d = monthlyRecords[key];
+        document.getElementById('incomeInput').value = d.income;
+        document.getElementById('expFood').value = d.food;
+        document.getElementById('expRent').value = d.rent;
+        document.getElementById('expTransport').value = d.transport;
+        document.getElementById('expEducation').value = d.education;
+        document.getElementById('expEntertainment').value = d.entertainment;
+        document.getElementById('expEmergency').value = d.emergency;
+        document.getElementById('expOthers').value = d.others || 0;
+        recalculateAll();
+    }
+}
+document.getElementById('entryMonth').addEventListener('change', changeActiveMonth);
+
+/* ============================= AI ASSISTANT (local reasoning engine, no network/API key needed) ============================= */
+/* Runs entirely in-browser against your live numbers — works offline, in any browser, with zero external calls. */
+
+const QUICK_PRESETS = {
+    laptop: { item: 'Laptop', cost: 60000, months: 3 },
+    smartphone: { item: 'Smartphone', cost: 25000, months: 2 },
+    phone: { item: 'Smartphone', cost: 25000, months: 2 },
+    bike: { item: 'Bike', cost: 150000, months: 12 },
+    car: { item: 'Car', cost: 800000, months: 24 },
+    house: { item: 'House', cost: 5000000, months: 60 },
+    tv: { item: 'TV', cost: 40000, months: 2 },
+    refrigerator: { item: 'Refrigerator', cost: 35000, months: 3 },
+    fridge: { item: 'Refrigerator', cost: 35000, months: 3 },
+    'washing machine': { item: 'Washing Machine', cost: 28000, months: 2 },
+    washer: { item: 'Washing Machine', cost: 28000, months: 2 },
+    console: { item: 'Gaming Console', cost: 50000, months: 4 },
+    gaming: { item: 'Gaming Console', cost: 50000, months: 4 },
+    smartwatch: { item: 'Smartwatch', cost: 15000, months: 1 },
+    watch: { item: 'Smartwatch', cost: 15000, months: 1 },
+    gold: { item: 'Gold Chain', cost: 100000, months: 12 },
+    camera: { item: 'Camera', cost: 70000, months: 6 },
+    vacation: { item: 'Vacation', cost: 80000, months: 6 },
+};
+
+function findGoalOrPreset(question) {
+    const q = question.toLowerCase();
+    const activeMatch = goals.find(g => q.includes(g.item.toLowerCase()));
+    if (activeMatch) return { ...activeMatch, source: 'active goal' };
+    for (const key in QUICK_PRESETS) {
+        if (q.includes(key)) {
+            const p = QUICK_PRESETS[key];
+            const s = latestSnapshot || computeSnapshot(readInputs());
+            const availableForGoals = Math.max(s.netSavings, 0);
+            const monthlyNeeded = p.cost / p.months;
+            return {
+                item: p.item, cost: p.cost, months: p.months,
+                monthlyNeeded, availableForGoals,
+                feasible: monthlyNeeded <= availableForGoals,
+                source: 'preset estimate'
+            };
+        }
+    }
+    return null;
+}
+
+function affordabilityAnswer(g) {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    let out = `${g.item} costs ${inrFull(g.cost)}. `;
+    if (g.availableForGoals <= 0) {
+        out += `You currently have ${inrFull(g.availableForGoals)} free each month after expenses, so this isn't affordable right now — you'd need to reduce expenses or increase income before saving toward it.`;
+        return out;
+    }
+    if (g.feasible) {
+        out += `At your target of ${inrFull(g.monthlyNeeded)}/month over ${g.months} months, this fits comfortably within your ${inrFull(g.availableForGoals)}/month free cash flow. You're on track.`;
+    } else {
+        const shortfall = g.monthlyNeeded - g.availableForGoals;
+        const realisticMonths = Math.ceil(g.cost / g.availableForGoals);
+        out += `You'd need ${inrFull(g.monthlyNeeded)}/month to hit it in ${g.months} months, but only ${inrFull(g.availableForGoals)}/month is currently free — a shortfall of ${inrFull(shortfall)}. At your current pace, it would realistically take about ${realisticMonths} months instead.`;
+    }
+    if (s.healthScore < 50) {
+        out += ` Also worth noting: your Health Score is ${s.healthScore}/100, so consider trimming discretionary spend before committing to a new purchase.`;
+    }
+    return out;
+}
+
+function healthScoreAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    return `Your AI Health Score is ${s.healthScore}/100. Breakdown — Savings Rate: ${s.scoreSavings.toFixed(1)}/30 pts (${(s.savingsRatio*100).toFixed(1)}% saved vs 20% target); Essential Spending: ${s.scoreNeeds.toFixed(1)}/25 pts (${(s.needsRatio*100).toFixed(1)}% of income vs ≤50% target); Discretionary Spending (Entertainment + Others): ${s.scoreWants.toFixed(1)}/20 pts (${(s.wantsRatio*100).toFixed(1)}% vs ≤30% target); Emergency Fund: ${s.scoreEmergency.toFixed(1)}/25 pts (${(s.emergencyRatio*100).toFixed(1)}% vs ≥10% target). ${s.healthScore < 60 ? 'Biggest lever right now: ' + (s.scoreSavings < 15 ? 'increase your net savings rate.' : s.scoreNeeds < 15 ? 'cut essential spending.' : s.scoreEmergency < 15 ? 'grow your emergency fund.' : 'trim discretionary spend.') : 'Keep up the current pace to stay in a healthy range.'}`;
+}
+
+function overspendingAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const issues = [];
+    if (s.netSavings < 0) issues.push(`you're spending ${inrFull(Math.abs(s.netSavings))} more than you earn this month`);
+    if (s.needs > s.idealNeeds) issues.push(`essentials (food/rent/transport/education) are ${inrFull(s.needs - s.idealNeeds)} over the 50% guideline`);
+    if (s.wants > s.idealWants) issues.push(`entertainment spend is ${inrFull(s.wants - s.idealWants)} over the 30% guideline`);
+    if (s.emergency < s.idealSavings) issues.push(`emergency fund contributions are ${inrFull(s.idealSavings - s.emergency)} short of the 20% target`);
+    if (issues.length === 0) return `Nothing to flag — your spending across needs, wants, and savings is within the recommended 50/30/20 limits. Health Score: ${s.healthScore}/100.`;
+    return `Here's where the numbers are off: ${issues.join('; ')}. Priority fix: address the largest gap first, then re-check your Health Score (currently ${s.healthScore}/100).`;
+}
+
+function generalSummaryAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    return `Right now: income ${inrFull(s.income)}, total expenses ${inrFull(s.totalExpenses)}, net savings ${inrFull(s.netSavings)}, Health Score ${s.healthScore}/100. Ask me about a specific goal (e.g. "can I afford a bike?"), your Health Score breakdown, your budget plan status, or where you're overspending.`;
+}
+
+function improveScoreAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const gaps = [
+        { name: 'Savings Rate', score: s.scoreSavings, max: 30, fix: `raise your net savings — even ${inrFull(s.income*0.05)} more per month adds meaningfully to this component` },
+        { name: 'Essential Spending', score: s.scoreNeeds, max: 25, fix: `bring Food+Rent+Transport+Education down toward ${inrFull(s.idealNeeds)} (currently ${inrFull(s.needs)})` },
+        { name: 'Discretionary Spending', score: s.scoreWants, max: 20, fix: `cap Entertainment + Others near ${inrFull(s.idealWants)} (currently ${inrFull(s.wants)}: Entertainment ${inrFull(s.entertainment)} + Others ${inrFull(s.others)})` },
+        { name: 'Emergency Fund', score: s.scoreEmergency, max: 25, fix: `increase your Emergency Fund contribution toward ${inrFull(s.idealSavings)} (currently ${inrFull(s.emergency)})` },
+    ].sort((a,b) => (a.score/a.max) - (b.score/b.max));
+    const top = gaps[0];
+    return `Your Health Score is ${s.healthScore}/100. Biggest opportunity: ${top.name} is only ${top.score.toFixed(1)}/${top.max} pts — ${top.fix}. Fixing that one lever will move your score the most; the next weakest area after that is ${gaps[1].name}.`;
+}
+
+function overallHealthAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const badge = scoreBadgeInfo(s.healthScore);
+    let verdict;
+    if (s.healthScore >= 80) verdict = "You're in excellent shape — savings, essentials, and emergency fund are all well-balanced.";
+    else if (s.healthScore >= 60) verdict = "You're doing reasonably well, with some room to tighten one or two categories.";
+    else if (s.healthScore >= 40) verdict = "Your finances are at risk — a few categories are outside the recommended ranges and need attention soon.";
+    else verdict = "Your finances are in a critical state right now and need immediate action.";
+    return `Overall status: ${badge.label} (${s.healthScore}/100). ${verdict} Net savings this month: ${inrFull(s.netSavings)}.`;
+}
+
+function biggestCategoryAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const cats = [
+        { name: 'Rent/Housing', val: s.rent }, { name: 'Food', val: s.food },
+        { name: 'Transport', val: s.transport }, { name: 'Education', val: s.education },
+        { name: 'Entertainment', val: s.entertainment }, { name: 'Emergency Fund', val: s.emergency },
+        { name: 'Others', val: s.others },
+    ].sort((a,b) => b.val - a.val);
+    const top = cats[0];
+    const pct = s.income > 0 ? (top.val / s.income * 100).toFixed(1) : '0.0';
+    return `Your largest expense category is ${top.name} at ${inrFull(top.val)} — that's ${pct}% of your income. Next highest: ${cats[1].name} (${inrFull(cats[1].val)}).`;
+}
+
+function yearlyProjectionAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const yearly = s.netSavings * 12;
+    if (s.netSavings <= 0) return `At your current rate you're not saving anything monthly (net: ${inrFull(s.netSavings)}), so projected over a year you'd end up with ${inrFull(yearly)} — meaning a deficit. Fix the monthly gap first.`;
+    return `At your current net savings of ${inrFull(s.netSavings)}/month, you're on pace to save about ${inrFull(yearly)} over the next 12 months (assuming income and expenses stay steady).`;
+}
+
+function emergencyFundAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const target3 = s.totalExpenses * 3;
+    const target6 = s.totalExpenses * 6;
+    return `A standard guideline is 3–6 months of expenses in your emergency fund. Based on your current monthly expenses of ${inrFull(s.totalExpenses)}, that's a target range of ${inrFull(target3)} to ${inrFull(target6)} total saved up. You're currently contributing ${inrFull(s.emergency)}/month toward it.`;
+}
+
+function ruleExplainerAnswer() {
+    return `The 50/30/20 rule is a budgeting guideline: 50% of income to Needs (rent, food, transport, education), 30% to Wants (entertainment, discretionary spend), and 20% to Savings (emergency fund + leftover). This dashboard's Health Score and Radar alerts are built directly around these three targets, and the Smart Budget Planner lets you customize the split category-by-category.`;
+}
+
+function categoryPercentAnswer(q, categoryKey, label, val) {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const pct = s.income > 0 ? (val / s.income * 100).toFixed(1) : '0.0';
+    return `${label} is ${inrFull(val)}, which is ${pct}% of your ${inrFull(s.income)} income.`;
+}
+
+function rentTooHighAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const pct = s.income > 0 ? (s.rent / s.income * 100) : 0;
+    if (pct > 30) return `Yes — rent is ${inrFull(s.rent)}, which is ${pct.toFixed(1)}% of your income. The common guideline caps housing at around 30% of income; you're over that, which is squeezing your other categories.`;
+    return `No — rent is ${inrFull(s.rent)}, which is ${pct.toFixed(1)}% of your income, within the commonly recommended ≤30% guideline for housing.`;
+}
+
+function greetingAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    return `Hello! 👋 How can I help you with your finances today? You can ask me about affording a goal, your Health Score (currently ${s.healthScore}/100), your budget plan status, where you're overspending, or how to save more.`;
+}
+
+function improveSavingsAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const tips = [];
+    if (s.wants > s.idealWants) tips.push(`cut discretionary spend — Entertainment + Others is ${inrFull(s.wants)}, ${inrFull(s.wants - s.idealWants)} over the ${inrFull(s.idealWants)} guideline`);
+    if (s.needs > s.idealNeeds) tips.push(`trim essentials where you can — Food/Rent/Transport/Education total ${inrFull(s.needs)}, ${inrFull(s.needs - s.idealNeeds)} over the ${inrFull(s.idealNeeds)} guideline`);
+    if (s.emergency < s.idealSavings) tips.push(`automate ${inrFull(s.idealSavings - s.emergency)} more per month into your Emergency Fund so it happens before you can spend it`);
+    if (s.netSavings < 0) tips.push(`most urgent: you're spending ${inrFull(Math.abs(s.netSavings))} more than you earn — stop that gap before optimizing anything else`);
+    if (tips.length === 0) tips.push(`you're already within the 50/30/20 guidelines — try raising your savings target above 20% to hit goals faster, or start investing the surplus`);
+    return `You're currently saving ${inrFull(s.netSavings)}/month (${(s.savingsRatio*100).toFixed(1)}% of income). To improve that: ${tips.join('; ')}. The simplest habit that works: automate the transfer to savings on payday, then spend only what's left.`;
+}
+
+function budgetPlanStatusAnswer() {
+    const s = latestSnapshot || computeSnapshot(readInputs());
+    const overs = [];
+    BUDGET_CATEGORY_META.forEach(c => {
+        const planned = s.income * (budgetPlan[c.key] / 100);
+        const actual = s[c.key];
+        if (actual > planned) overs.push(`${c.label} is ${inrFull(actual - planned)} over its ${inrFull(planned)} plan`);
+    });
+    if (overs.length === 0) return `You're within your Smart Budget Plan across every category — nice and disciplined. Keep tracking each month to stay ahead of drift.`;
+    return `You're over plan in ${overs.length} categor${overs.length === 1 ? 'y' : 'ies'}: ${overs.join('; ')}. Tighten these first, or adjust the % allocation in the planner if the plan itself needs updating.`;
+}
+
+function generateAIResponse(question) {
+    const q = question.toLowerCase().trim();
+    const s = latestSnapshot || computeSnapshot(readInputs());
+
+    if (/^(hi|hii+|hello+|hey+|heya|yo|sup|good morning|good afternoon|good evening)[\s!.,]*$/.test(q)) return greetingAnswer();
+    if (q.includes('within') && (q.includes('budget') || q.includes('plan'))) return budgetPlanStatusAnswer();
+    if (q.includes('improve') && q.includes('saving')) return improveSavingsAnswer();
+    if (q.includes('improve') && (q.includes('score') || q.includes('health'))) return improveScoreAnswer();
+    if (q.includes('health score') || q.includes('breakdown')) return healthScoreAnswer();
+    if (q.includes('financially healthy') || q.includes('how am i doing') || q.includes('overall')) return overallHealthAnswer();
+    if (q.includes('overspend') || q.includes('where am i') || (q.includes('cut') && q.includes('spend'))) return overspendingAnswer();
+    if (q.includes('biggest') || q.includes('highest') || q.includes('most') && q.includes('categor')) return biggestCategoryAnswer();
+    if (q.includes('year') && (q.includes('save') || q.includes('projection'))) return yearlyProjectionAnswer();
+    if (q.includes('emergency fund') && (q.includes('should') || q.includes('how much') || q.includes('ideal'))) return emergencyFundAnswer();
+    if (q.includes('50/30/20') || q.includes('50-30-20') || (q.includes('rule') && q.includes('budget'))) return ruleExplainerAnswer();
+    if (q.includes('rent') && (q.includes('too high') || q.includes('high'))) return rentTooHighAnswer();
+    if (q.includes('food') && (q.includes('%') || q.includes('percent') || q.includes('how much'))) return categoryPercentAnswer(q, 'food', 'Food spending', s.food);
+    if (q.includes('transport') && (q.includes('%') || q.includes('percent') || q.includes('how much'))) return categoryPercentAnswer(q, 'transport', 'Transport spending', s.transport);
+    if (q.includes('education') && (q.includes('%') || q.includes('percent') || q.includes('how much'))) return categoryPercentAnswer(q, 'education', 'Education spending', s.education);
+    if (q.includes('entertainment') && (q.includes('%') || q.includes('percent') || q.includes('how much'))) return categoryPercentAnswer(q, 'entertainment', 'Entertainment spending', s.entertainment);
+    if (q.includes('others') && (q.includes('%') || q.includes('percent') || q.includes('how much'))) return categoryPercentAnswer(q, 'others', 'Miscellaneous ("Others") spending', s.others);
+
+    const goalMatch = findGoalOrPreset(q);
+    if (goalMatch) return affordabilityAnswer(goalMatch);
+    return generalSummaryAnswer();
+}
+
+function appendChatBubble(text, from) {
+    const hist = document.getElementById('chatHistory');
+    const bubble = document.createElement('div');
+    if (from === 'user') {
+        bubble.className = 'bg-indigo-600 text-white p-2.5 rounded-lg max-w-[88%] ml-auto shadow-sm';
+    } else {
+        bubble.className = 'bg-white text-slate-700 p-2.5 rounded-lg max-w-[88%] border border-slate-200 shadow-sm';
+    }
+    bubble.textContent = text;
+    hist.appendChild(bubble);
+    hist.scrollTop = hist.scrollHeight;
+    return bubble;
+}
+function appendTypingBubble() {
+    const hist = document.getElementById('chatHistory');
+    const bubble = document.createElement('div');
+    bubble.className = 'bg-white text-indigo-600 p-2.5 rounded-lg max-w-[88%] border border-slate-200 shadow-sm flex gap-1';
+    bubble.innerHTML = `<span class="typing-dot">●</span><span class="typing-dot">●</span><span class="typing-dot">●</span>`;
+    hist.appendChild(bubble);
+    hist.scrollTop = hist.scrollHeight;
+    return bubble;
+}
+
+function sendToAssistant(question) {
+    appendChatBubble(question, 'user');
+    const typingBubble = appendTypingBubble();
+    setTimeout(() => {
+        const answer = generateAIResponse(question);
+        typingBubble.remove();
+        appendChatBubble(answer, 'ai');
+    }, 450 + Math.random() * 350); // brief delay so it reads as "thinking", not instant
+}
+function askPreset(question) {
+    sendToAssistant(question);
+}
+function askAIAssistant() {
+    const input = document.getElementById('userQuery');
+    const q = input.value.trim();
+    if (!q) return;
+    input.value = '';
+    sendToAssistant(q);
+}
+
+/* ============================= INIT ============================= */
+(function init() {
+    const d = new Date();
+    document.getElementById('entryMonth').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    renderBudgetPlannerRows();
+    recalculateAll();
+    renderPreviousDataTab();
+})();
+    </script>
+</body>
+</html>
